@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ShowVideoCapture</class>
+ <widget class="QMainWindow" name="ShowVideoCapture">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>QtWidgetCamera</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QLabel" name="inVideo">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>1001</width>
+      <height>768</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>1040</x>
+      <y>10</y>
+      <width>231</width>
+      <height>731</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>VIDEO</string>
+     </attribute>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>220</y>
+        <width>221</width>
+        <height>311</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Picture</string>
+      </property>
+      <widget class="QPushButton" name="ButtonCapture">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>191</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Capture Picture</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_picture">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>171</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="text">
+        <string>Show Picture</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>100</y>
+         <width>171</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QRadioButton" name="radioSide2Side">
+          <property name="text">
+           <string>Side by Side</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioResetView">
+          <property name="text">
+           <string>Reset View</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QPushButton" name="ButtonSavePicture">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>170</y>
+         <width>191</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Save Picture</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>10</y>
+        <width>221</width>
+        <height>191</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Video</string>
+      </property>
+      <widget class="QPushButton" name="ButtonDefaultJSON">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>140</y>
+         <width>191</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Default Settings</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ButtonStart">
+       <property name="geometry">
+        <rect>
+         <x>11</x>
+         <y>30</y>
+         <width>85</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Start</string>
+       </property>
+      </widget>
+      <widget class="QWidget" name="layoutWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>90</y>
+         <width>171</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QRadioButton" name="radioDefault">
+          <property name="text">
+           <string>From JSON</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QPushButton" name="ButtonStop">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>30</y>
+         <width>85</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Stop</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>OPTIONS</string>
+     </attribute>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>80</y>
+        <width>124</width>
+        <height>111</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QRadioButton" name="radioXGA">
+         <property name="text">
+          <string>XGA</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="radioHD">
+         <property name="text">
+          <string>HD</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="radioFullHD">
+         <property name="text">
+          <string>FullHD</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QPushButton" name="ButtonSave">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>240</y>
+        <width>191</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Save Options</string>
+      </property>
+     </widget>
+     <widget class="QSplitter" name="splitter">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>10</y>
+        <width>201</width>
+        <height>54</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="Exposure_label">
+          <property name="text">
+           <string>Exposure</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="SpinBoxExposure">
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="maximum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.000050000000000</double>
+          </property>
+          <property name="value">
+           <double>0.001850000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="Gain_label">
+          <property name="text">
+           <string>Gain</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="SpinBoxGain">
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="maximum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.001100000000000</double>
+          </property>
+          <property name="value">
+           <double>0.000900000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+     <widget class="QLabel" name="inSlideShow">
+      <property name="geometry">
+       <rect>
+        <x>-97</x>
+        <y>307</y>
+        <width>600</width>
+        <height>400</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <zorder>splitter</zorder>
+     <zorder>layoutWidget</zorder>
+     <zorder>ButtonSave</zorder>
+     <zorder>inSlideShow</zorder>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="ButtonExit">
+    <property name="geometry">
+     <rect>
+      <x>1040</x>
+      <y>750</y>
+      <width>231</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Exit</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="inPicture">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>235</y>
+      <width>480</width>
+      <height>320</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
