@@ -1,6 +1,6 @@
 # OpenCV_General
 
-## Small openCV projects.
+## Small OpenCV projects.
 each project should contain readme file with some clearification 
 
 The projects so far:
