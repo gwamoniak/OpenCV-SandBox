@@ -40,14 +40,37 @@ void ShowVideoCapture::on_radioDefault_clicked()
 void ShowVideoCapture::on_ButtonStart_clicked()
 {
     qDebug() << "Start";
+    QMessageBox msgBox;
+
+
+#ifdef Q_OS_LINUX
+    if(!m_CameraProcess.LinuxCameraSetup())
+    {
+        qWarning() << "Linux Setup error " << '\n';
+        msgBox.setText("Linux Camera Setup error");
+        msgBox.exec();
+    }
+#endif
 
     if(m_CameraProcess.LoadCameraSettings())
     {
 
-        QMessageBox msgBox;
+
         msgBox.setText("Please connect a camera.");
         msgBox.exec();
-        m_CameraProcess.start();
+        try
+        {
+               m_CameraProcess.start();
+        }
+        catch (const std::exception& e)
+        {
+
+            qWarning() << "CameraProcess error: " << e.what() <<'\n';
+            msgBox.setText("Connection with the camera interrupted");
+            msgBox.exec();
+
+        }
+
     }
 }
 

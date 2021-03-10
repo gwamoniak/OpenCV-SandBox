@@ -5,14 +5,13 @@
 #include <time.h>
 
 
+
 VideoProcessorThread::VideoProcessorThread(QObject *parent) : QThread(parent)
 {
      m_eResolution = JsonCameraSettings::ERROR;
      m_vPictures.clear();
-     m_bResize = false;
      m_bTakeImage = false;
      m_bSide2Side = false;
-     m_bSlideS = false;
      m_nPictureNumber = 0;
 }
 
@@ -27,26 +26,27 @@ void VideoProcessorThread::run()
     using namespace cv;
 
     Size resize(800,800);
-    Size size400(400,400), temp(640,480), resizeHVGA(480,320);
+    Size size400(400,400), temp(1024,768);
     Mat_<cv::Vec4b> inFrame;
 
 
+         struct tm* timeinfo;
 
-    struct tm* timeinfo;
+        const QCameraInfo cameraInfo;
+        QString camera_name = cameraInfo.defaultCamera().deviceName();
+        qDebug() << camera_name;
 
-    const QCameraInfo cameraInfo;
-    QString camera_name = cameraInfo.defaultCamera().deviceName();
-
-            bool bStatus;
+            bool bStatus = false;
             int cameraIDX = camera_name.mid(camera_name.length()-1,1).toInt(&bStatus); //extract camera ID from string
 
-            if(bStatus){
+            qDebug() << cameraIDX;
 
-            #ifdef PLATFORM_MIRA
-                m_camera.open(cameraIDX+CV_CAP_GSTREAMER_QUEUE_LENGTH);
-            #elif PLATFORM_DESKTOP
-                m_camera.open(cameraIDX);
-            #endif
+
+            if(!camera_name.isEmpty()){
+
+             bStatus = true;
+             m_camera.open(cameraIDX,cv::CAP_ANY);
+
 
             // populate settings variables
              m_dExposure  = m_CameraSettings.getExposure();
@@ -54,14 +54,14 @@ void VideoProcessorThread::run()
              m_nWidth     = m_CameraSettings.getWidth();
              m_nHeight    = m_CameraSettings.getHeight();
 
-             qDebug() << "Gain: " <<  static_cast<double>(m_camera.get(CV_CAP_PROP_GAIN ));
-             qDebug() << "Exposure: " <<  m_camera.get(CV_CAP_PROP_EXPOSURE);
+             //qDebug() << "Gain: " <<  static_cast<double>(m_camera.get(CAP_PROP_GAIN ));
+             //qDebug() << "Exposure: " <<  m_camera.get(CAP_PROP_EXPOSURE);
 
             // set the camera
-             m_camera.set(CV_CAP_PROP_EXPOSURE, m_dExposure);
-             m_camera.set(CV_CAP_PROP_GAIN, m_dGain );
-             m_camera.set(CV_CAP_PROP_FRAME_WIDTH, m_nWidth);
-             m_camera.set(CV_CAP_PROP_FRAME_HEIGHT,m_nHeight);
+             m_camera.set(CAP_PROP_EXPOSURE, m_dExposure);
+             m_camera.set(CAP_PROP_GAIN, m_dGain );
+             m_camera.set(CAP_PROP_FRAME_WIDTH, m_nWidth);
+             m_camera.set(CAP_PROP_FRAME_HEIGHT,m_nHeight);
 
 
              qDebug() <<  m_nWidth;
@@ -71,134 +71,141 @@ void VideoProcessorThread::run()
 
 
             }
+            else
+            {
+                qDebug() << "Camera is not conected";
+                bStatus = false;
 
-    double frameCounter = 0.0;
-    cv::String valueAsString = "FPS: ";
+            }
 
-    clock_t deltaTime = 0;
-    unsigned int frames = 0;
-    double  frameRate = 30;
-    double  averageFrameTimeMilliseconds = 33.333;
-
-    std::array<char, 64> datebuffer; // container for date and time
-    datebuffer.fill(0);
-
-
-
-    while(m_camera.isOpened() && !isInterruptionRequested())
+    if(bStatus)
     {
+        double frameCounter = 0.0, scale = 1.0;
+        cv::String valueAsString = "FPS: ";
+        CascadeClassifier faceCascade;
+        faceCascade.load("haarcascade_frontalface_alt2.xml"); // your OpenCV haarcascade
 
-        int64 start = cv::getTickCount();
-        clock_t beginFrame = clock();
-        cv::Point dateCoordinate( m_nWidth - 260,m_nHeight - 25);
+//        clock_t deltaTime = 0;
+//        unsigned int frames = 0;
+//        double  frameRate = 30;
+//        double  averageFrameTimeMilliseconds = 33.333;
 
-        m_camera >> inFrame;
-        if(inFrame.empty())
-            continue;
+        std::array<char, 64> datebuffer; // container for date and time
+        datebuffer.fill(0);
 
-          time_t now = time(0);
-          timeinfo = localtime(&now);
-          strftime(datebuffer.data(),sizeof(datebuffer),"%d-%m-%Y %I:%M:%S",timeinfo);
+        cv::Mat cameraMatrix, distCoeffs;
+        cv::Mat grayscale;
+        std::vector<Rect> faces;
+        std::vector<cv::Vec3d> rvecs, tvecs;
+        std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
 
-       if(m_bResize == true && m_bSide2Side == false)
+
+        try
         {
-           if(m_nWidth >= 400 && m_nHeight >= 400)
-           {
-             Rect roi((m_nWidth-400)/2,(m_nHeight-400)/2, 400, 400);
-             /* Crop the original image to the defined ROI */
-             inFrame = inFrame(roi);
-             cv::resize(inFrame,inFrame,resize,0,0,INTER_LANCZOS4);
-             dateCoordinate = cv::Point(800 -260, 800-25);
-           }
+
+            while(m_camera.isOpened() && !isInterruptionRequested())
+            {
+
+                int64 start = cv::getTickCount();
+                clock_t beginFrame = clock();
+                cv::Point dateCoordinate( m_nWidth - 250,m_nHeight - 25);
+
+                m_camera >> inFrame;
+                if(inFrame.empty())
+                    continue;
+
+                time_t now = time(0);
+                timeinfo = localtime(&now);
+                strftime(datebuffer.data(),sizeof(datebuffer),"%d-%m-%Y %I:%M:%S",timeinfo);
+
+                cv::putText(inFrame,
+                            datebuffer.data(),
+                            dateCoordinate, // Coordinates
+                            cv::FONT_HERSHEY_COMPLEX_SMALL, // Font
+                            1.0, // Scale. 2.0 = 2x bigger
+                            cv::Scalar(0,255,0), // Color
+                            1, // Thickness
+                            cv::LINE_AA);
+
+                //take picture
+                if(m_bTakeImage)
+                {
+                    //qDebug() << "take picture";
+                    cv::Mat_<cv::Vec4b> image(inFrame);
+                    TakePhoto(image);
+                }
+
+
+
+                if(m_bSide2Side)
+                {
+                    if(!m_vPictures.empty())
+                    {
+                        cv::resize(inFrame,inFrame,size400,0,0,INTER_LANCZOS4);
+                        QImage picture(m_vPictures.back().data,m_vPictures.back().cols,m_vPictures.back().rows,m_vPictures.back().step,QImage::Format_RGB888);
+                        emit inPicture(QPixmap::fromImage(picture.rgbSwapped()));
+
+                    }
+                    else
+                    {
+                        qDebug() << "Take a picture first";
+                    }
+                }
+
+                frameCounter = cv::getTickFrequency() / (cv::getTickCount() - start);
+
+                cv::putText(inFrame,
+                            valueAsString+QString::number(frameCounter).toStdString(),
+                            cv::Point(25,35), // Coordinates
+                            cv::FONT_HERSHEY_COMPLEX_SMALL, // Font
+                            1.0, // Scale. 2.0 = 2x bigger
+                            cv::Scalar(0,255,0), // Color
+                            1, // Thickness
+                            cv::LINE_AA);
+
+                //detect face
+
+
+                cv::cvtColor(inFrame,grayscale,COLOR_BGR2GRAY);
+                cv::resize(grayscale,grayscale,cv::Size(grayscale.size().width/scale,grayscale.size().height/scale));
+                faceCascade.detectMultiScale(grayscale,faces,1.1,3,0,cv::Size(30,30));
+
+                for(Rect area: faces)
+                {
+                    cv::Scalar drawColor = Scalar(255,0,0);
+                    cv::rectangle(inFrame,cv::Point(cvRound(area.x*scale),cvRound(area.y*scale)),
+                                  cv::Point(cvRound((area.x +area.width -1)*scale),cvRound((area.y +area.height -1)*scale)),drawColor);
+                }
+
+
+                QImage image(inFrame.data,inFrame.cols,inFrame.rows,inFrame.step,QImage::Format_RGB888);
+                emit inDisplay(QPixmap::fromImage(image.rgbSwapped()));
+
+
+            }
 
         }
-
-       cv::putText(inFrame,
-                    datebuffer.data(),
-                    dateCoordinate, // Coordinates
-                    cv::FONT_HERSHEY_COMPLEX_SMALL, // Font
-                     1.0, // Scale. 2.0 = 2x bigger
-                     cv::Scalar(0,255,0), // Color
-                     1, // Thickness
-                     CV_AA);
-
-       //take picture
-       if(m_bTakeImage)
-       {
-          //qDebug() << "take picture";
-           cv::Mat_<cv::Vec4b> image(inFrame);
-          TakePhoto(image);
-       }
+        catch (const std::exception& e)
+        {
+            qDebug() << "CameraProcess error: " << e.what() <<'\n';
+        }
 
 
 
 
 
-       if(m_bSide2Side)
-       {
-           if(!m_vPictures.empty())
-           {
-               cv::resize(inFrame,inFrame,resizeHVGA,0,0,INTER_LANCZOS4);
-               QImage picture(m_vPictures.back().data,m_vPictures.back().cols,m_vPictures.back().rows,m_vPictures.back().step,QImage::Format_RGB888);
-               emit inPicture(QPixmap::fromImage(picture.rgbSwapped()));
-
-           }
-           else
-           {
-               qDebug() << "Take a picture first";
-           }
-       }
-
-       frameCounter = cv::getTickFrequency() / (cv::getTickCount() - start);
-
-       cv::putText(inFrame,
-                   valueAsString+QString::number(frameCounter).toStdString(),
-                   cv::Point(25,35), // Coordinates
-                   cv::FONT_HERSHEY_COMPLEX_SMALL, // Font
-                   1.0, // Scale. 2.0 = 2x bigger
-                   cv::Scalar(0,255,0), // Color
-                   1, // Thickness
-                   CV_AA);
-
-    if(!m_bSlideS)
-    {
-           QImage image(inFrame.data,inFrame.cols,inFrame.rows,inFrame.step,QImage::Format_RGB888);
-           emit inDisplay(QPixmap::fromImage(image.rgbSwapped()));
-
-
+        m_camera.release();
     }
-
-
-
-//         deltaTime += endFrame - beginFrame;
-
-//         ++frames;
-
-//       //if you really want FPS
-//       if( clockToMilliseconds(deltaTime)>100.0){
-//           averageFrameTimeMilliseconds  = 1000.0/(frameRate==0?0.001:frameRate);
-
-//            qDebug()<<"FPS was:"<<averageFrameTimeMilliseconds/frames << '\n';
-//            deltaTime -= CLOCKS_PER_SEC;
-//            frames = 0;
-//       }
-
-
-    }
-
-    m_camera.release();
-
 }
 
 void VideoProcessorThread::TakePhoto(const cv::Mat_<cv::Vec4b> &image)
 {
     m_vPictures.push_back(image); // can save pictures latter
     m_bTakeImage = false;
-    //qDebug() << "size vector: " << m_vPictures.size();
     QImage qimage(image.data,image.cols,image.rows,image.step,QImage::Format_RGB888);
 
 
-    QString imagePath = "/home/phytec-vizaar/yocto/prj_workspace/Qt/build-Qt_JsonCamera-Desktop_Qt_5_6_3_GCC_64bit-Release/example.jpg";
+    QString imagePath = "example.jpg";
     qimage = qimage.rgbSwapped();
     qimage.save(imagePath);
 
@@ -275,8 +282,8 @@ bool VideoProcessorThread::UpdateCameraSettings()
 void VideoProcessorThread::GetDefaultSettings()
 {
   m_sFormatInfo = "SGRBG8";
-  m_nWidth      = 640;
-  m_nHeight     = 480;
+  m_nWidth      = 1024;
+  m_nHeight     = 768;
   m_dGain       = 0.00090;
   m_dExposure   = 0.00185;
 }
@@ -306,30 +313,16 @@ bool VideoProcessorThread::LinuxCameraSetup()
 
       m_eResolution = m_CameraSettings.getResolution();
 
-
+       // linux emmbeded setup
       switch(m_eResolution)
       {
-       case JsonCameraSettings::VGA:
-             qDebug() << "Setting VGA";
-             terminal_cmd->start("sh",QStringList()<<"-c"<<"media-ctl -V ''2:'0[fmt:'SGRBG8'/'640x480'('32,66')/'2560x1920']'");
-             terminal_cmd->waitForStarted();
-             terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":0[fmt:'SGRBG8'/'640x480']'");
-             terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":1[fmt:'SGRBG8'/'640x480']'");
-         break;
-       case JsonCameraSettings::SVGA:
-             qDebug() << "Setting SVGA";
-             terminal_cmd->start("sh",QStringList()<<"-c"<<"media-ctl -V ''2:'0[fmt:'SGRBG8'/'800x600'('512,426')/'1600x1200']'");
-             terminal_cmd->waitForStarted();
-             terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":0[fmt:'SGRBG8'/'800x600']'");
-             terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":1[fmt:'SGRBG8'/'800x600']'");
-         break;
       case JsonCameraSettings::XGA:
-             qDebug() << "Setting XGA";
-             terminal_cmd->start("sh",QStringList()<<"-c"<<"media-ctl -V ''2:'0[fmt:'SGRBG8'/'1024x768'('288,258')/'2048x1536']'");
-             terminal_cmd->waitForStarted();
-             terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":0[fmt:'SGRBG8'/'1024x768']'");
-             terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":1[fmt:'SGRBG8'/'1024x768']'");
-        break;
+                   qDebug() << "Setting XGA";
+                   terminal_cmd->start("sh",QStringList()<<"-c"<<"media-ctl -V ''2:'0[fmt:'SGRBG8'/'1024x768'('288,258')/'2048x1536']'");
+                   terminal_cmd->waitForStarted();
+                   terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":0[fmt:'SGRBG8'/'1024x768']'");
+                   terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":1[fmt:'SGRBG8'/'1024x768']'");
+              break;
       case JsonCameraSettings::HD:
              qDebug() << "Setting HD";
              terminal_cmd->start("sh",QStringList()<<"-c"<<"media-ctl -V ''2:'0[fmt:'SGRBG8'/'1280x720'('32,306')/'2560x1440']'");
@@ -346,12 +339,11 @@ bool VideoProcessorThread::LinuxCameraSetup()
         break;
       case JsonCameraSettings::ERROR:
              qDebug() << "Resolution unsupported or not specified, reseting to default";
-             terminal_cmd->start("sh",QStringList()<<"-c"<<"media-ctl -V ''2:'0[fmt:'SGRBG8'/'640x480'('32,66')/'2560x1920']'");
+             terminal_cmd->start("sh",QStringList()<<"-c"<<"media-ctl -V ''2:'0[fmt:'SGRBG8'/'1024x768'('288,258')/'2048x1536']'");
              terminal_cmd->waitForStarted();
-             terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":0[fmt:'SGRBG8'/'640x480']'");
-             terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":1[fmt:'SGRBG8'/'640x480']'");
+             terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":0[fmt:'SGRBG8'/'1024x768']'");
+             terminal_cmd->startDetached("sh",QStringList()<<"-c"<<"media-ctl -V '\"ipu0-csi0-sd\":1[fmt:'SGRBG8'/'1024x768']'");
         break;
-
        }
 
 
@@ -371,4 +363,6 @@ bool VideoProcessorThread::LinuxCameraSetup()
 
     return bStatus;
 }
+
+
 

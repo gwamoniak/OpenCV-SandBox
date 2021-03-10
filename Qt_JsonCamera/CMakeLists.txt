@@ -26,6 +26,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #    endif()
 #endif()
 
+if(WINDOWS)
+        set(BUILD_FOR_WIN TRUE)
+endif()
+
+if(LINUX)
+    set(BUILD_FOR_LINUX TRUE)
+    set(CMAKE_C_COMPILER ${tools}/bin/arm-linux-gnueabihf-gcc)
+    set(CMAKE_CXX_COMPILER ${tools}/bin/arm-linux-gnueabihf-g++)
+endif()
+
+
+
 SET("OpenCV_DIR" "E:/coding/opencv/build/x64/vc16/lib")
 SET(QT_USE_QTMULTIMEDIA TRUE)
 
