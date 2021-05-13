@@ -8,9 +8,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 
 
 # QtCreator supports the following variables for Android, which are identical to qmake Android variables.
@@ -39,11 +38,14 @@ endif()
 
 
 SET("OpenCV_DIR" "E:/coding/opencv/build/x64/vc16/lib")
+#SET("OpenCV_DIR" "E:/coding/opencv/build/include")
+#SET("OpenCV_LIBS" "E:/coding/opencv/build/x64/vc16/lib")
 SET(QT_USE_QTMULTIMEDIA TRUE)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 find_package(Qt5Multimedia REQUIRED)
+find_package(Qt5Charts REQUIRED)
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
@@ -70,3 +72,4 @@ MESSAGE(STATUS "LINK LIBRARIES ${OpenCV_LIBS}")
 target_link_libraries(Qt_JsonCamera PRIVATE ${OpenCV_LIBS})
 target_link_libraries(Qt_JsonCamera PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(Qt_JsonCamera PRIVATE Qt${QT_VERSION_MAJOR}::Multimedia)
+target_link_libraries(Qt_JsonCamera PRIVATE Qt${QT_VERSION_MAJOR}::Charts)

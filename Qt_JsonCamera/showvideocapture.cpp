@@ -205,3 +205,84 @@ void ShowVideoCapture::on_ButtonSavePicture_clicked()
 {
 
 }
+
+void ShowVideoCapture::on_ButtonHistogram_clicked()
+{
+   qDebug() << "Histogram clicked";
+   QtCharts::QBarSet *set0 = new QtCharts::QBarSet("Altuve");
+      QtCharts::QBarSet *set1 = new QtCharts::QBarSet("Martinez");
+     QtCharts::QBarSet *set2 = new QtCharts::QBarSet("Segura");
+     QtCharts::QBarSet *set3 = new QtCharts::QBarSet("Simmons");
+     QtCharts::QBarSet *set4 = new QtCharts::QBarSet("Trout");
+
+      // Assign values for each bar
+      *set0 << 283 << 341 << 313 << 338 << 346 << 335;
+      *set1 << 250 << 315 << 282 << 307 << 303 << 330;
+      *set2 << 294 << 246 << 257 << 319 << 300 << 325;
+      *set3 << 248 << 244 << 265 << 281 << 278 << 313;
+      *set4 << 323 << 287 << 299 << 315 << 306 << 313;
+
+      // Add all sets of data to the chart as a whole
+      // 1. Bar Chart
+      QtCharts::QBarSeries *series = new QtCharts::QBarSeries();
+
+      // 2. Stacked bar chart
+      // QHorizontalStackedBarSeries *series = new QHorizontalStackedBarSeries();
+      series->append(set0);
+      series->append(set1);
+      series->append(set2);
+      series->append(set3);
+      series->append(set4);
+
+      // Used to define the bar chart to display, title
+      // legend,
+      QtCharts::QChart *chart = new QtCharts::QChart();
+
+      // Add the chart
+      chart->addSeries(series);
+
+      // Set title
+      chart->setTitle("Batting Avg by Year");
+
+      // Define starting animation
+      // NoAnimation, GridAxisAnimations, SeriesAnimations
+      chart->setAnimationOptions(QtCharts::QChart::AllAnimations);
+
+      // Holds the category titles
+      QStringList categories;
+      categories << "2013" << "2014" << "2015" << "2016" << "2017" << "2018";
+
+      // Adds categories to the axes
+      QtCharts::QBarCategoryAxis *axis = new QtCharts::QBarCategoryAxis();
+      axis->append(categories);
+      chart->createDefaultAxes();
+
+      // 1. Bar chart
+      chart->setAxisX(axis, series);
+
+      // 2. Stacked Bar chart
+      // chart->setAxisY(axis, series);
+
+      // Define where the legend is displayed
+      chart->legend()->setVisible(true);
+      chart->legend()->setAlignment(Qt::AlignBottom);
+
+      // Used to display the chart
+      QtCharts::QChartView *chartView = new QtCharts::QChartView(chart);
+      chartView->setRenderHint(QPainter::Antialiasing);
+
+      // Used to change the palette
+      QPalette pal = qApp->palette();
+
+      // Change the color around the chart widget and text
+      pal.setColor(QPalette::Window, QRgb(0xffffff));
+      pal.setColor(QPalette::WindowText, QRgb(0x404044));
+
+      // Apply palette changes to the application
+      qApp->setPalette(pal);
+
+        chartView->show();
+
+
+
+}
