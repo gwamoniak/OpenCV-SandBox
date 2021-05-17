@@ -213,14 +213,12 @@ void ShowVideoCapture::on_ButtonHistogram_clicked()
       QtCharts::QBarSet *set1 = new QtCharts::QBarSet("Martinez");
      QtCharts::QBarSet *set2 = new QtCharts::QBarSet("Segura");
      QtCharts::QBarSet *set3 = new QtCharts::QBarSet("Simmons");
-     QtCharts::QBarSet *set4 = new QtCharts::QBarSet("Trout");
 
       // Assign values for each bar
       *set0 << 283 << 341 << 313 << 338 << 346 << 335;
       *set1 << 250 << 315 << 282 << 307 << 303 << 330;
       *set2 << 294 << 246 << 257 << 319 << 300 << 325;
       *set3 << 248 << 244 << 265 << 281 << 278 << 313;
-      *set4 << 323 << 287 << 299 << 315 << 306 << 313;
 
       // Add all sets of data to the chart as a whole
       // 1. Bar Chart
@@ -232,10 +230,8 @@ void ShowVideoCapture::on_ButtonHistogram_clicked()
       series->append(set1);
       series->append(set2);
       series->append(set3);
-      series->append(set4);
 
       // Used to define the bar chart to display, title
-      // legend,
       QtCharts::QChart *chart = new QtCharts::QChart();
 
       // Add the chart
@@ -281,7 +277,7 @@ void ShowVideoCapture::on_ButtonHistogram_clicked()
       // Apply palette changes to the application
       qApp->setPalette(pal);
 
-        chartView->show();
+      chartView->show();
 
 
 
