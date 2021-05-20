@@ -18,6 +18,7 @@ VideoProcessorThread::VideoProcessorThread(QObject *parent) : QThread(parent)
 constexpr double clockToMilliseconds(clock_t ticks){
     // units/(units/time) => time (seconds) * 1000 = milliseconds
     return (ticks/(double)CLOCKS_PER_SEC)*1000.0;
+	
 }
 
 
@@ -26,7 +27,7 @@ void VideoProcessorThread::run()
     using namespace cv;
 
     Size resize(800,800);
-    Size size400(400,400), temp(1024,768);
+    Size size400(400,400);
     Mat_<cv::Vec4b> inFrame;
 
 
@@ -58,8 +59,8 @@ void VideoProcessorThread::run()
              //qDebug() << "Exposure: " <<  m_camera.get(CAP_PROP_EXPOSURE);
 
             // set the camera
-             m_camera.set(CAP_PROP_EXPOSURE, m_dExposure);
-             m_camera.set(CAP_PROP_GAIN, m_dGain );
+             m_camera.set(CAP_PROP_EXPOSURE, 1);
+            // m_camera.set(CAP_PROP_GAIN, m_dGain );
              m_camera.set(CAP_PROP_FRAME_WIDTH, m_nWidth);
              m_camera.set(CAP_PROP_FRAME_HEIGHT,m_nHeight);
 
@@ -68,6 +69,7 @@ void VideoProcessorThread::run()
              qDebug() <<  m_nHeight;
              qDebug() <<  m_CameraSettings.getWidth();
              qDebug() <<  m_CameraSettings.getHeight();
+             qDebug() << "exposure: " << m_camera.get(CAP_PROP_EXPOSURE);
 
 
             }
@@ -189,9 +191,6 @@ void VideoProcessorThread::run()
         {
             qDebug() << "CameraProcess error: " << e.what() <<'\n';
         }
-
-
-
 
 
         m_camera.release();
