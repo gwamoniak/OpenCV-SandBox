@@ -55,6 +55,8 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
       jsonfile.cpp
       keyboardfilter.cpp
       main.cpp
+      drawfacelandmarks.h
+      renderface.h
       showvideocapture.cpp
       videoprocessorthread.cpp
       jsonCamerasettings.h

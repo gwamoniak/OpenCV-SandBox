@@ -1,4 +1,5 @@
 #include "videoprocessorthread.h"
+#include "drawfacelandmarks.h"
 #include <QtMultimedia/QCameraInfo>
 #include <QPainter>
 #include <ctime>
@@ -100,6 +101,9 @@ void VideoProcessorThread::run()
         std::vector<Rect> faces;
         std::vector<cv::Vec3d> rvecs, tvecs;
         std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
+        Ptr<cv::face::Facemark> facemark = cv::face::createFacemarkKazemi();
+
+        facemark->loadModel("face_landmark_model.dat");
 
 
         try
@@ -172,13 +176,28 @@ void VideoProcessorThread::run()
                 cv::resize(grayscale,grayscale,cv::Size(grayscale.size().width/scale,grayscale.size().height/scale));
                 faceCascade.detectMultiScale(grayscale,faces,1.1,3,0,cv::Size(30,30));
 
-                for(Rect area: faces)
-                {
-                    cv::Scalar drawColor = Scalar(255,0,0);
-                    cv::rectangle(inFrame,cv::Point(cvRound(area.x*scale),cvRound(area.y*scale)),
-                                  cv::Point(cvRound((area.x +area.width -1)*scale),cvRound((area.y +area.height -1)*scale)),drawColor);
-                }
 
+
+
+                std::vector< std::vector<Point2f> > landmarks;
+                bool success = facemark->fit(inFrame,faces,landmarks);
+                if(success)
+                {
+                    // draw rectangle around face
+                    for(Rect area: faces)
+                    {
+                        cv::Scalar drawColor = Scalar(255,0,0);
+                        cv::rectangle(inFrame,cv::Point(cvRound(area.x*scale),cvRound(area.y*scale)),
+                                      cv::Point(cvRound((area.x +area.width -1)*scale),cvRound((area.y +area.height -1)*scale)),drawColor);
+                    }
+
+                    // If successful, render the landmarks on the face
+                    for(int i = 0; i < landmarks.size(); i++)
+                    {
+                        drawLandmarks(inFrame, landmarks[i]);
+                    }
+
+                }
 
                 QImage image(inFrame.data,inFrame.cols,inFrame.rows,inFrame.step,QImage::Format_RGB888);
                 emit inDisplay(QPixmap::fromImage(image.rgbSwapped()));
